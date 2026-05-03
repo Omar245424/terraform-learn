@@ -1,0 +1,37 @@
+name: 'Terraform OIDC Automation'
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  terraform:
+    name: 'Terraform Action'
+    runs-on: ubuntu-latest
+    
+    # These permissions are required for requesting the OIDC JWT token
+    permissions:
+      id-token: write      # Required for OIDC
+      contents: read       # Required for Checkout
+      pull-requests: write # Required for PR comments
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run AWS Terraform Action
+        uses: CloudNinjaDev/aws-terraform-action@v2.0.2
+        with:
+          # Use your specific IAM Role ARN here
+          role_to_assume: "arn:aws:iam::993168274789:role/Github-Actions-Terraform-Run"
+          aws_region: "us-east-1"
+          
+          # Action behavior
+          run_fmt: true
+          run_validate: true
+          run_plan: true
+          run_apply: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
